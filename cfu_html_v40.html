@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Colony Counter - BDK</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 과학/실험실 분위기에 맞는 색상 체계 */
+            --primary-color: #0d47a1;
+            --secondary-color: #1565c0;
+            --accent-color: #2196f3;
+            --success-color: #00c853;
+            --warning-color: #ffc107;
+            --danger-color: #f44336;
+            --background-color: #f5f7fa;
+            --card-bg-color: #ffffff;
+            --text-color: #263238;
+            --text-light: #546e7a;
+            --border-color: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+        }
+
+        /* 기본 스타일 */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* 헤더 스타일 */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDUwIDUwIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSIzMCIgY3k9IjEwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjEwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSIxMCIgY3k9IjMwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjMwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSIxMCIgY3k9IjUwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSIzMCIgY3k9IjUwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMSkiLz48L3N2Zz4=');
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .header-subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        .header-subtitle::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background-color: var(--accent-color);
+            transition: width var(--transition-normal);
+        }
+
+        .header-subtitle:hover::after {
+            width: 100px;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .main-content {
+            background-color: var(--card-bg-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* 사이드바 스타일 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: var(--card-bg-color);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transition: right var(--transition-normal);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .sidebar.is-active {
+            right: 0;
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: background-color var(--transition-fast);
+        }
+
+        .sidebar-toggle:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .sidebar-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* 이미지 컨테이너 스타일 */
+        #imageContainer {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            min-height: 400px;
+            margin: 1.5rem 0;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #imageContainer:hover {
+            border-color: var(--accent-color);
+            box-shadow: var(--shadow-md);
+        }
+
+        #uploadedImage {
+            display: none;
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+
+        #canvas {
+            position: absolute;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        #placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-light);
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: center;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #placeholder i {
+            font-size: 3rem;
+            color: var(--accent-color);
+            opacity: 0.7;
+        }
+
+        /* 파일 업로드 스타일 */
+        .file-upload {
+            margin-bottom: 1.5rem;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .file-upload-label:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .file-upload-label i {
+            margin-right: 0.5rem;
+        }
+
+        .file-upload-input {
+            display: none;
+        }
+
+        /* 버튼 스타일 */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all var(--transition-fast);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: #212121;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-info {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* 카운터 스타일 */
+        .counter-badge {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .counter-badge i {
+            font-size: 1.2rem;
+        }
+
+        /* 슬라이더 스타일 */
+        .control-panel {
+            background-color: #f8f9fa;
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .control-panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .slider-container {
+            margin: 1.5rem 0;
+        }
+
+        .slider-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .slider-value {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+            margin: 1rem 0;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* 범례 스타일 */
+        .legend-box {
+            background-color: #f8f9fa;
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .legend-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .legend-item-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+        }
+
+        .legend-item-text {
+            color: var(--text-color);
+        }
+
+        /* 알림 스타일 */
+        .notification-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification-badge.is-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        /* 최종 카운트 스타일 */
+        .final-count {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--success-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 반응형 스타일 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-title {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                justify-content: center;
+            }
+            
+            .btn {
+                min-width: 100px;
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .sidebar {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 삭제 모드 알림 -->
+    <div id="deleteMode" class="notification-badge is-danger is-hidden" aria-live="polite">
+        <i class="fas fa-trash-alt"></i> 삭제 모드
+    </div>
+
+    <!-- 사이드바 토글 버튼 -->
+    <button id="sidebarToggle" class="sidebar-toggle">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- 사이드바 -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">설정</h3>
+        </div>
+        
+        <!-- 이미지 크기 조절 슬라이더 -->
+        <div class="slider-container">
+            <div class="slider-label">
+                <span>이미지 크기 조절</span>
+                <span id="imageSizeValue" class="slider-value">100%</span>
+            </div>
+            <input type="range" id="uploadedImageResizer" min="10" max="100" value="100" class="slider" />
+        </div>
+        
+        <!-- 원 크기 조절 슬라이더 -->
+        <div class="slider-container">
+            <div class="slider-label">
+                <span>마커 크기 조절</span>
+                <span id="scaleValue" class="slider-value">9px</span>
+            </div>
+            <input type="range" id="scaleSlider" min="5" max="30" value="9" class="slider" />
+        </div>
+        
+        <!-- 클릭 표시 범례 -->
+        <div class="legend-box">
+            <h4 class="legend-title"><i class="fas fa-info-circle"></i> 클릭 표시 범례</h4>
+            <div class="legend-item">
+                <div class="legend-item-color" style="background-color: var(--danger-color);"></div>
+                <div class="legend-item-text">단일 클릭</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-item-color" style="background-color: var(--warning-color);"></div>
+                <div class="legend-item-text">중복 클릭 (숫자: 클릭순서 / 괄호: 중복횟수)</div>
+            </div>
+            <div class="legend-item">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger-color); margin-right: 0.75rem;"></i>
+                <div class="legend-item-text">삭제 모드에서는 원을 클릭하여 삭제할 수 있습니다.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="container">
+        <div class="app-header">
+            <div class="header-content">
+                <h1 class="header-title">Colony Counter</h1>
+                <div class="header-subtitle">Produced by BDK&reg;</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <!-- 파일 입력 -->
+            <div class="file-upload">
+                <label class="file-upload-label">
+                    <i class="fas fa-upload"></i> 이미지 선택
+                    <input class="file-upload-input" type="file" id="fileInput" accept="image/*" aria-label="이미지 파일 선택">
+                </label>
+            </div>
+
+            <div class="is-hidden">
+                <input type="file" id="importInput" accept=".json" aria-label="데이터 파일 선택" />
+            </div>
+
+            <!-- 이미지 업로드 영역 -->
+            <div id="imageContainer" tabindex="0" aria-label="이미지 업로드 영역">
+                <img id="uploadedImage" alt="업로드된 이미지" />
+                <canvas id="canvas"></canvas>
+                <div id="placeholder">
+                    <i class="fas fa-microscope"></i>
+                    <span>이미지를 선택하세요</span>
+                </div>
+            </div>
+
+            <!-- 버튼들 -->
+            <div class="action-buttons">
+                <button id="deleteBtn" class="btn btn-warning">
+                    <i class="fas fa-trash-alt"></i> 삭제
+                </button>
+                <button id="clearBtn" class="btn btn-danger">
+                    <i class="fas fa-eraser"></i> 초기화
+                </button>
+                <button id="exportBtn" class="btn btn-info">
+                    <i class="fas fa-file-export"></i> 내보내기
+                </button>
+                <button id="importBtn" class="btn btn-info">
+                    <i class="fas fa-file-import"></i> 불러오기
+                </button>
+                <button id="saveImageBtn" class="btn btn-success">
+                    <i class="fas fa-save"></i> 이미지 저장
+                </button>
+                <div id="counter" class="counter-badge">
+                    <i class="fas fa-calculator"></i> 클릭 횟수: 0
+                </div>
+                <button id="completeBtn" class="btn btn-primary">
+                    <i class="fas fa-check-circle"></i> 완료
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS와 초기화 스크립트 -->
+    <script>
+        /**
+         * Colony Counter - Main Application
+         * Refactored for better maintainability and code reuse
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            // ========== DOM 요소 ==========
+            const deleteModeIndicator = document.getElementById("deleteMode");
+            const deleteBtn = document.getElementById("deleteBtn");
+            const fileInput = document.getElementById("fileInput");
+            const imageContainer = document.getElementById("imageContainer");
+            const uploadedImage = document.getElementById("uploadedImage");
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            const counter = document.getElementById("counter");
+            const placeholder = document.getElementById("placeholder");
+            const scaleSlider = document.getElementById("scaleSlider");
+            const scaleValue = document.getElementById("scaleValue");
+            const imageResizer = document.getElementById("uploadedImageResizer");
+            const imageSizeValue = document.getElementById("imageSizeValue");
+            const sidebar = document.getElementById("sidebar");
+            const sidebarToggle = document.getElementById("sidebarToggle");
+
+            // ========== 설정 및 상수 정의 ==========
+            const CONFIG = {
+                MARKER: {
+                    FILL_COLOR: "rgba(255, 0, 0, 0.5)",
+                    STROKE_COLOR: "rgba(255, 0, 0, 0.8)",
+                    LINE_WIDTH: 2,
+                    FONT_SIZE_MULTIPLIER: 1.2,
+                    MIN_FONT_SIZE: 12
+                },
+                TOTAL_COUNT: {
+                    FONT_SIZE: 24,
+                    COLOR: "#4CAF50",
+                    BG_COLOR: "rgba(255, 255, 255, 0.9)",
+                    PADDING: 10,
+                    POSITION: { x: 20, y: 20 },
+                    HEIGHT_OFFSET: 34
+                },
+                NOTIFICATION: {
+                    DURATION: 3000,
+                    FADE_DURATION: 300
+                },
+                FILE_UPLOAD: {
+                    MAX_SIZE: 50 * 1024 * 1024, // 50MB
+                    ALLOWED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+                }
+            };
+
+            let isDeleteMode = false;
+            let clickCount = 0;
+            let clicks = [];
+
+            // 사이드바 토글 기능
+            sidebarToggle.addEventListener("click", () => {
+                sidebar.classList.toggle("is-active");
+                sidebarToggle.innerHTML = sidebar.classList.contains("is-active") 
+                    ? '<i class="fas fa-times"></i>' 
+                    : '<i class="fas fa-cog"></i>';
+            });
+
+            // 삭제 모드 토글
+            deleteBtn.addEventListener("click", () => {
+                isDeleteMode = !isDeleteMode;
+                deleteModeIndicator.classList.toggle("is-hidden", !isDeleteMode);
+                deleteBtn.classList.toggle("btn-danger", isDeleteMode);
+                deleteBtn.classList.toggle("btn-warning", !isDeleteMode);
+                
+                if (isDeleteMode) {
+                    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> 삭제 중...';
+                } else {
+                    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> 삭제';
+                }
+            });
+
+            // 파일 입력 시 이미지 업로드
+            fileInput.addEventListener("change", (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // 파일 검증
+                if (!CONFIG.FILE_UPLOAD.ALLOWED_TYPES.includes(file.type)) {
+                    showNotification(
+                        "지원되지 않는 파일 형식입니다. (JPG, PNG, GIF, WebP만 가능)",
+                        "danger"
+                    );
+                    fileInput.value = "";
+                    return;
+                }
+
+                if (file.size > CONFIG.FILE_UPLOAD.MAX_SIZE) {
+                    showNotification(
+                        `파일 크기가 너무 큽니다. (최대 ${CONFIG.FILE_UPLOAD.MAX_SIZE / 1024 / 1024}MB)`,
+                        "danger"
+                    );
+                    fileInput.value = "";
+                    return;
+                }
+
+                // 기존 작업 확인
+                if (clicks.length > 0) {
+                    if (!confirm("새 이미지를 로드하면 현재 작업이 손실됩니다. 계속하시겠습니까?")) {
+                        fileInput.value = "";
+                        return;
+                    }
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    uploadedImage.src = e.target.result;
+                    uploadedImage.style.display = "block";
+                    placeholder.style.display = "none";
+
+                    uploadedImage.onload = () => {
+                        // 캔버스는 항상 원본 이미지 크기로 설정
+                        canvas.width = uploadedImage.naturalWidth;
+                        canvas.height = uploadedImage.naturalHeight;
+
+                        // 캔버스를 이미지 위치에 정확히 맞춤
+                        positionCanvas();
+
+                        // 기존 final-count 제거
+                        const existingCount = document.querySelector(".final-count");
+                        if (existingCount) {
+                            existingCount.remove();
+                        }
+
+                        // 클릭 카운트 초기화
+                        clickCount = 0;
+                        clicks = [];
+                        updateCounter();
+                        redrawAllMarkers();
+
+                        showNotification("이미지가 성공적으로 로드되었습니다.", "success");
+                    };
+
+                    uploadedImage.onerror = () => {
+                        uploadedImage.style.display = "none";
+                        placeholder.style.display = "flex";
+                        showNotification("이미지를 로드할 수 없습니다.", "danger");
+                    };
+                };
+
+                reader.onerror = () => {
+                    showNotification("파일을 읽을 수 없습니다. 다시 시도해주세요.", "danger");
+                    fileInput.value = "";
+                };
+
+                reader.readAsDataURL(file);
+            });
+
+            // ========== 유틸리티 함수 ==========
+
+            // 알림 아이콘 선택
+            function getNotificationIcon(type) {
+                const icons = {
+                    success: "check-circle",
+                    warning: "exclamation-triangle",
+                    danger: "exclamation-circle",
+                    info: "info-circle"
+                };
+                return icons[type] || icons.info;
+            }
+
+            // 알림 표시 함수
+            function showNotification(message, type = "info") {
+                // 기존 알림 제거
+                const existingNotification = document.querySelector(".temp-notification");
+                if (existingNotification) {
+                    existingNotification.remove();
+                }
+
+                // 새 알림 생성
+                const notification = document.createElement("div");
+                notification.className = `notification-badge temp-notification is-${type}`;
+                notification.innerHTML = `<i class="fas fa-${getNotificationIcon(type)}"></i> ${message}`;
+                document.body.appendChild(notification);
+
+                // 알림 자동 제거
+                setTimeout(() => {
+                    notification.style.opacity = "0";
+                    setTimeout(() => notification.remove(), CONFIG.NOTIFICATION.FADE_DURATION);
+                }, CONFIG.NOTIFICATION.DURATION);
+            }
+
+            // 데이터 내보내기 객체 생성
+            function createExportData() {
+                return {
+                    clicks: clicks,  // 좌표는 이미 원본 크기 기준
+                    imageData: uploadedImage.src,
+                    timestamp: new Date().toISOString(),
+                    totalCount: clickCount,
+                    originalWidth: uploadedImage.naturalWidth,
+                    originalHeight: uploadedImage.naturalHeight
+                };
+            }
+
+            // 파일 저장 공통 함수
+            async function saveFile(blob, suggestedName, fileType) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: suggestedName,
+                        types: [{
+                            description: fileType.description,
+                            accept: fileType.accept
+                        }]
+                    });
+
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    return true;
+                } catch (err) {
+                    // 사용자가 취소한 경우 폴백하지 않음
+                    if (err.name === 'AbortError') {
+                        console.log('파일 저장 취소됨');
+                        return false;
+                    }
+
+                    console.error('파일 저장 오류:', err);
+                    // 폴백: 다운로드 링크 방식
+                    try {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = suggestedName;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        return true;
+                    } catch (fallbackErr) {
+                        console.error('폴백 저장 실패:', fallbackErr);
+                        return false;
+                    }
+                }
+            }
+
+            // ========== 이벤트 리스너 ==========
+
+            // 이미지 저장 버튼
+            document.getElementById("saveImageBtn").addEventListener("click", async () => {
+                if (!uploadedImage.src) {
+                    showNotification("저장할 이미지가 없습니다.", "warning");
+                    return;
+                }
+
+                try {
+                    const tempCanvas = createTempCanvas();
+                    const tempCtx = tempCanvas.getContext('2d');
+                    renderMarkersToCanvas(tempCanvas, tempCtx, true);
+
+                    const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
+                    await saveFile(blob, 'colony_counter_image.png', {
+                        description: 'PNG Image',
+                        accept: {'image/png': ['.png']}
+                    });
+
+                    showNotification("이미지가 성공적으로 저장되었습니다.", "success");
+                } catch (err) {
+                    console.error('이미지 저장 중 오류:', err);
+                    showNotification("이미지 저장 중 오류가 발생했습니다.", "danger");
+                }
+            });
+
+            // 초기화 버튼 이벤트 리스너
+            document.getElementById("clearBtn").addEventListener("click", () => {
+                if (clicks.length === 0) {
+                    showNotification("초기화할 데이터가 없습니다.", "info");
+                    return;
+                }
+                
+                if (confirm("모든 마커를 초기화하시겠습니까?")) {
+                    clicks = [];
+                    clickCount = 0;
+                    updateCounter();
+                    redrawAllMarkers();
+                    
+                    // final-count 제거
+                    const existingCount = document.querySelector(".final-count");
+                    if (existingCount) {
+                        existingCount.remove();
+                    }
+                    
+                    showNotification("모든 마커가 초기화되었습니다.", "success");
+                }
+            });
+
+            // 이미지 크기 조절 슬라이더 변경 시
+            imageResizer.addEventListener("input", (e) => {
+                const newWidthPercentage = e.target.value;
+                imageSizeValue.textContent = `${newWidthPercentage}%`;
+                uploadedImage.style.maxWidth = `${newWidthPercentage}%`;
+
+                // 이미지 크기 변경 후 캔버스 위치 재조정
+                setTimeout(() => {
+                    positionCanvas();
+                    redrawAllMarkers();
+                }, 10);
+            });
+
+            // 캔버스 클릭 처리
+            canvas.addEventListener("click", (event) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+
+                if (isDeleteMode) {
+                    const deletedCount = deleteClick(x, y);
+                    if (deletedCount > 0) {
+                        showNotification(`${deletedCount}개의 마커가 삭제되었습니다.`, "info");
+                    }
+                } else {
+                    addClick(x, y);
+                    // 클릭 효과 애니메이션
+                    const clickEffect = document.createElement("div");
+                    clickEffect.style.position = "absolute";
+                    clickEffect.style.left = `${event.clientX}px`;
+                    clickEffect.style.top = `${event.clientY}px`;
+                    clickEffect.style.width = "20px";
+                    clickEffect.style.height = "20px";
+                    clickEffect.style.borderRadius = "50%";
+                    clickEffect.style.backgroundColor = "rgba(255, 0, 0, 0.5)";
+                    clickEffect.style.transform = "translate(-50%, -50%) scale(0)";
+                    clickEffect.style.transition = "all 0.3s ease";
+                    clickEffect.style.zIndex = "9999";
+                    document.body.appendChild(clickEffect);
+                    
+                    setTimeout(() => {
+                        clickEffect.style.transform = "translate(-50%, -50%) scale(1)";
+                        clickEffect.style.opacity = "0";
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        clickEffect.remove();
+                    }, 300);
+                }
+                redrawAllMarkers();
+                updateCounter();
+            });
+
+            // 원 크기 조절 슬라이더 변경 시
+            scaleSlider.addEventListener("input", (e) => {
+                const newValue = e.target.value;
+                scaleValue.textContent = `${newValue}px`;
+                redrawAllMarkers();
+            });
+
+            function addClick(x, y) {
+                clicks.push({ x, y });
+                clickCount++;
+            }
+
+            function deleteClick(x, y) {
+                const initialLength = clicks.length;
+                clicks = clicks.filter(click => {
+                    const distance = Math.sqrt((click.x - x) ** 2 + (click.y - y) ** 2);
+                    return distance > parseInt(scaleSlider.value);
+                });
+                clickCount = clicks.length;
+                return initialLength - clicks.length;
+            }
+
+            function redrawAllMarkers() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                clicks.forEach((click, index) => {
+                    drawCircleWithNumber(click.x, click.y, index + 1);
+                });
+            }
+
+            // ========== 헬퍼 함수 ==========
+
+            /**
+             * 중요: 좌표 시스템
+             * - 캔버스는 항상 원본 이미지 크기 (naturalWidth/Height)로 설정됨
+             * - 클릭 좌표는 원본 크기 기준으로 저장됨
+             * - 화면 표시는 CSS로만 조정됨 (이미지 슬라이더)
+             * - 따라서 저장/로드 시 좌표 변환 불필요
+             */
+
+            // 캔버스를 이미지 위치에 정확히 배치
+            function positionCanvas() {
+                const imgRect = uploadedImage.getBoundingClientRect();
+                const containerRect = imageContainer.getBoundingClientRect();
+
+                // 이미지의 실제 표시 크기와 위치 계산
+                canvas.style.width = `${imgRect.width}px`;
+                canvas.style.height = `${imgRect.height}px`;
+                canvas.style.left = `${imgRect.left - containerRect.left}px`;
+                canvas.style.top = `${imgRect.top - containerRect.top}px`;
+            }
+
+            // 마커 그리기 (공통 함수)
+            function drawMarker(context, x, y, number, scale = 1) {
+                const circleRadius = parseInt(scaleSlider.value) * scale;
+
+                context.beginPath();
+                context.arc(x, y, circleRadius, 0, Math.PI * 2);
+                context.fillStyle = CONFIG.MARKER.FILL_COLOR;
+                context.fill();
+                context.strokeStyle = CONFIG.MARKER.STROKE_COLOR;
+                context.lineWidth = CONFIG.MARKER.LINE_WIDTH;
+                context.stroke();
+
+                const fontSize = Math.max(
+                    CONFIG.MARKER.MIN_FONT_SIZE,
+                    circleRadius * CONFIG.MARKER.FONT_SIZE_MULTIPLIER
+                );
+                context.fillStyle = "white";
+                context.font = `${fontSize}px Arial`;
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillText(number, x, y);
+            }
+
+            // 총 수량 표시 그리기
+            function drawTotalCount(context, count, scale) {
+                const fontSize = CONFIG.TOTAL_COUNT.FONT_SIZE * scale;
+                const totalText = `Total: ${count}`;
+
+                context.font = `bold ${fontSize}px Arial`;
+                const textMetrics = context.measureText(totalText);
+                const padding = CONFIG.TOTAL_COUNT.PADDING * scale;
+
+                // 배경 사각형
+                context.fillStyle = CONFIG.TOTAL_COUNT.BG_COLOR;
+                context.fillRect(
+                    CONFIG.TOTAL_COUNT.POSITION.x * scale,
+                    CONFIG.TOTAL_COUNT.POSITION.y * scale,
+                    textMetrics.width + (padding * 2),
+                    (CONFIG.TOTAL_COUNT.HEIGHT_OFFSET * scale) + (padding * 2)
+                );
+
+                // 텍스트
+                context.fillStyle = CONFIG.TOTAL_COUNT.COLOR;
+                context.textAlign = "left";
+                context.textBaseline = "top";
+                context.fillText(
+                    totalText,
+                    (CONFIG.TOTAL_COUNT.POSITION.x * scale) + padding,
+                    (CONFIG.TOTAL_COUNT.POSITION.y * scale) + padding
+                );
+            }
+
+            // 캔버스에 마커 렌더링 (공통 함수)
+            function renderMarkersToCanvas(targetCanvas, targetContext, includeTotal = false) {
+                // 원본 이미지 그리기
+                targetContext.drawImage(
+                    uploadedImage,
+                    0, 0,
+                    uploadedImage.naturalWidth,
+                    uploadedImage.naturalHeight
+                );
+
+                // 마커 그리기 (좌표는 이미 원본 크기 기준이므로 변환 불필요)
+                clicks.forEach((click, index) => {
+                    drawMarker(targetContext, click.x, click.y, index + 1, 1);
+                });
+
+                // 총 수량 표시 (옵션)
+                if (includeTotal) {
+                    drawTotalCount(targetContext, clickCount, 1);
+                }
+            }
+
+            // 임시 캔버스 생성
+            function createTempCanvas() {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = uploadedImage.naturalWidth;
+                tempCanvas.height = uploadedImage.naturalHeight;
+                return tempCanvas;
+            }
+
+            function drawCircleWithNumber(x, y, number) {
+                drawMarker(ctx, x, y, number, 1);
+            }
+
+            function updateCounter() {
+                counter.innerHTML = `<i class="fas fa-calculator"></i> 클릭 횟수: ${clickCount}`;
+            }
+
+            // 데이터 내보내기 버튼
+            document.getElementById("exportBtn").addEventListener("click", async () => {
+                if (clicks.length === 0) {
+                    showNotification("내보낼 데이터가 없습니다.", "warning");
+                    return;
+                }
+
+                try {
+                    // 이미지 렌더링
+                    const tempCanvas = createTempCanvas();
+                    const tempCtx = tempCanvas.getContext('2d');
+                    renderMarkersToCanvas(tempCanvas, tempCtx, false);
+
+                    // 데이터 생성
+                    const data = createExportData();
+                    data.imageData = tempCanvas.toDataURL('image/png');
+
+                    // JSON 파일 저장
+                    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                    await saveFile(jsonBlob, 'colony_counter_data.json', {
+                        description: 'JSON File',
+                        accept: {'application/json': ['.json']}
+                    });
+
+                    // 이미지 파일 저장
+                    const imageBlob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
+                    await saveFile(imageBlob, 'colony_counter_image.png', {
+                        description: 'PNG Image',
+                        accept: {'image/png': ['.png']}
+                    });
+
+                    showNotification("데이터가 성공적으로 내보내졌습니다.", "success");
+                } catch (err) {
+                    console.error('데이터 내보내기 중 오류:', err);
+                    showNotification("데이터 내보내기 중 오류가 발생했습니다.", "danger");
+                }
+            });
+
+            // 데이터 불러오기 버튼
+            document.getElementById("importBtn").addEventListener("click", () => {
+                document.getElementById("importInput").click();
+            });
+
+            document.getElementById("importInput").addEventListener("change", (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+
+                        // 이미지 로드
+                        uploadedImage.src = data.originalImage || data.imageData;
+                        uploadedImage.style.display = "block";
+                        placeholder.style.display = "none";
+                        
+                        uploadedImage.onload = () => {
+                            // 캔버스는 항상 원본 이미지 크기로 설정
+                            canvas.width = uploadedImage.naturalWidth;
+                            canvas.height = uploadedImage.naturalHeight;
+
+                            // 캔버스를 이미지 위치에 정확히 맞춤
+                            positionCanvas();
+
+                            // 저장된 데이터에 원본 크기 정보가 있는 경우 좌표 조정
+                            if (data.originalWidth && data.originalHeight) {
+                                // 불러온 이미지와 내보낸 이미지의 크기 비율 계산
+                                const scaleX = uploadedImage.naturalWidth / data.originalWidth;
+                                const scaleY = uploadedImage.naturalHeight / data.originalHeight;
+
+                                // 크기가 다른 경우에만 좌표 조정
+                                if (Math.abs(scaleX - 1) > 0.01 || Math.abs(scaleY - 1) > 0.01) {
+                                    showNotification(
+                                        `이미지 크기가 다릅니다 (${data.originalWidth}x${data.originalHeight} → ${uploadedImage.naturalWidth}x${uploadedImage.naturalHeight}). 좌표가 조정됩니다.`,
+                                        "warning"
+                                    );
+
+                                    clicks = data.clicks.map(click => ({
+                                        x: click.x * scaleX,
+                                        y: click.y * scaleY
+                                    }));
+                                } else {
+                                    // 크기가 같으면 좌표 그대로 사용
+                                    clicks = data.clicks;
+                                }
+                            } else {
+                                // 이전 버전 호환성 유지
+                                clicks = data.clicks;
+                            }
+                            
+                            clickCount = clicks.length;
+                            redrawAllMarkers();
+                            updateCounter();
+                            showNotification("데이터가 성공적으로 로드되었습니다.", "success");
+                        };
+                    } catch (err) {
+                        console.error('데이터 불러오기 중 오류 발생:', err);
+                        showNotification("데이터 형식이 올바르지 않습니다.", "danger");
+                    }
+                };
+
+                reader.onerror = () => {
+                    showNotification("파일을 읽을 수 없습니다. 다시 시도해주세요.", "danger");
+                };
+
+                reader.readAsText(file);
+            });
+
+            // 완료 버튼 이벤트 리스너
+            const completeBtn = document.getElementById("completeBtn");
+            completeBtn.addEventListener("click", () => {
+                if (clicks.length === 0) {
+                    showNotification("표시할 결과가 없습니다.", "warning");
+                    return;
+                }
+                
+                // 기존 final-count 제거
+                const existingCount = document.querySelector(".final-count");
+                if (existingCount) {
+                    existingCount.remove();
+                }
+                
+                // 새로운 final-count 요소 생성 및 추가
+                const finalCount = document.createElement("div");
+                finalCount.className = "final-count";
+                finalCount.innerHTML = `<i class="fas fa-check-circle"></i> Total: ${clickCount}`;
+                imageContainer.appendChild(finalCount);
+                
+                showNotification("카운팅이 완료되었습니다.", "success");
+            });
+            
+            // 키보드 단축키 지원
+            document.addEventListener('keydown', (e) => {
+                // ESC 키로 사이드바 닫기
+                if (e.key === 'Escape' && sidebar.classList.contains('is-active')) {
+                    sidebar.classList.remove('is-active');
+                    sidebarToggle.innerHTML = '<i class="fas fa-cog"></i>';
+                }
+                
+                // Ctrl+Z로 마지막 클릭 취소
+                if (e.ctrlKey && e.key === 'z' && clicks.length > 0) {
+                    clicks.pop();
+                    clickCount--;
+                    redrawAllMarkers();
+                    updateCounter();
+                    showNotification("마지막 마커가 취소되었습니다.", "info");
+                }
+                
+                // D 키로 삭제 모드 토글
+                if (e.key === 'd' || e.key === 'D') {
+                    deleteBtn.click();
+                }
+                
+                // S 키로 저장
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    document.getElementById("saveImageBtn").click();
+                }
+            });
+            
+            // 윈도우 리사이즈 시 캔버스 위치 재조정
+            window.addEventListener('resize', () => {
+                if (uploadedImage.style.display !== 'none') {
+                    positionCanvas();
+                    redrawAllMarkers();
+                }
+            });
+
+            // 초기 상태 설정
+            updateCounter();
+        });
+    </script>
+</body>
+</html>
